@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+    /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+    #map {
+        height: 800px;
+        width: auto;
+        margin: 0;
+        padding: 0;
+    }
+    #floating-panel {
+        position: absolute;
+        top: 10px;
+        right: 5%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: left;
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+    }
+</style>
+<head>
+<body>
+
+<div id="parkMap">
+	<script src="https://maps.googleapis.com/maps/api/js?key=APIkeyGoesHere"> </script>
+
+
+
+
+	<div class="col-lg-12">
+		<div id="floating-panel">
+			<div class="form-check form-check-inline">
+				<label for="category_1" class="form-check-label">
+					<input class="form-check-input" type="checkbox" name="category" value="Hiking" onclick="displayMarkers(this, 1);"> Hiking
+				</label>
+			</div>
+			<div class="form-check form-check-inline">
+				<label for="category_2" class="form-check-label">
+					<input class="form-check-input" type="checkbox" name="category" value="Biking" onclick="displayMarkers(this, 2);"> Biking
+				</label>
+			</div>
+			<div class="form-check form-check-inline">
+				<label for="category_3" class="form-check-label">
+					<input class="form-check-input" type="checkbox" name="category" value="Equestrian" onclick="displayMarkers(this, 3);"> Equestrian
+				</label>
+			</div>
+			<div class="form-check form-check-inline">
+				<label for="category_4" class="form-check-label">
+					<input class="form-check-input" type="checkbox" name="category" value="Water" onclick="displayMarkers(this, 4);"> Water
+				</label>
+			</div>
+			<div class="form-check form-check-inline">
+				<label for="category_5" class="form-check-label">
+					<input class="form-check-input" type="checkbox" name="category" value="Yes" onclick="showMarkers(this, 9);"> Accessible
+				</label>
+			</div>
+		</div>
+		<div id="map"></div>
+	</div>
+
+	<script type="text/javascript">
+		var locations = [
+			['<img src="~wwwroot/images/map/ARSPmap.jpg" width="100" height="100" alt="Alapocas Run State Park - Climbing Wall"/><p><a href="#">Alapocas Run State Park</a></p><p>1914 W Park Dr<br> Wilmington, DE 19803<br>Alapocas Woods</p>', 39.773758, -75.565835, 1, 8],
+			['<img src="~wwwroot/images/map/ARSPmap.jpg" width="100" height="100" alt="Alapocas Run State Park - Climbing Wall"/><p><a href="#">Alapocas Run State Park</a></p><p>1914 W Park Dr<br> Wilmington, DE 19803<br>Pawpaw Loop</p>', 39.772280, -75.565182, 1, 8],
+			['<img src="~wwwroot/images/map/ARSPmap.jpg" width="100" height="100" alt="Alapocas Run State Park - Climbing Wall"/><p><a href="#">Alapocas Run State Park</a></p><p>1914 W Park Dr<br> Wilmington, DE 19803<br>Northern Delaware Greenway</p>', 39.770754, -75.557597, 2, 9],
+			['<img src="~wwwroot/images/map/ARSPmap.jpg" width="100" height="100" alt="Alapocas Run State Park - Climbing Wall"/><p><a href="#">Alapocas Run State Park</a></p><p>1914 W Park Dr<br> Wilmington, DE 19803<br>Northern Delaware Greenway</p>', 39.808565, -75.681854, 1, 9],
+			['<img src="~wwwroot/images/map/AHPmap.jpg" width="100" height="100" alt="Auburn Heights Preserve"/><p><a href="#">Auburn Heights Preserve</a></p><p>Hockessin, DE 19707<br>Trolley Trail</p>', 39.807890, -75.681021, 1, 8],
+			['<img src="~wwwroot/images/map/AHPmap.jpg" width="100" height="100" alt="Auburn Heights Preserve"/><p><a href="#">Auburn Heights Preserve</a></p><p>Hockessin, DE 19707<br>Auburn Heights Trail</p>', 39.808548, -75.681741, 2, 8],
+			['<img src="~wwwroot/images/map/BVSPmap.jpg" width="100" height="100" alt="Bellevue State Park"/><p><a href="#">Bellevue State Park</a></p><p>800 Carr Rd.<br> Wilmington, DE 19809<br>Northern Delaware Greenway</p>', 39.777833, -75.504202, 3, 9],
+			['<img src="~wwwroot/images/map/BVSPmap.jpg" width="100" height="100" alt="Bellevue State Park"/><p><a href="#">Bellevue State Park</a></p><p>800 Carr Rd.<br> Wilmington, DE 19809<br>Equestrian</p>', 39.779647, -75.503269, 3, 8],
+			['<img src="~wwwroot/images/map/BVSPmap.jpg" width="100" height="100" alt="Bellevue State Park"/><p><a href="#">Bellevue State Park</a></p><p>800 Carr Rd.<br> Wilmington, DE 19809<br>Nature Preserve</p>', 39.780048, -75.501955, 1, 8],
+			['<img src="~wwwroot/images/map/BVSPmap.jpg" width="100" height="100" alt="Bellevue State Park"/><p><a href="#">Bellevue State Park</a></p><p>800 Carr Rd.<br> Wilmington, DE 19809<br>Oval Track</p>', 39.777212, -75.503725, 2, 9],
+			['<img src="~wwwroot/images/map/BCSPmap.jpg" width="100" height="100" alt="Brandywine Creek"/><p><a href="#"Indian Springs</a></p><p>41 Adams Dam Road<br>Wilmington, DE 19807<br>Indian Springs</p>', 39.809542, -75.576390, 1, 8],
+			['<img src="~wwwroot/images/map/BCSPmap.jpg" width="100" height="100" alt="Brandywine Creek"/><p><a href="#">Brandywine Creek State Park</a></p><p>41 Adams Dam Road<br>Wilmington, DE 19807<br>Rocky Run</p>', 39.816096, -75.568543, 1, 9],
+			['<img src="~wwwroot/images/map/BCSPmap.jpg" width="100" height="100" alt="Brandywine Creek"/><p><a href="#">Brandywine Creek State Park</a></p><p>41 Adams Dam Road<br>Wilmington, DE 19807<br>Hidden Pond</p>', 39.809668, -75.576638, 1, 8],
+			['<img src="~wwwroot/images/map/BCSPmap.jpg" width="100" height="100" alt="Brandywine Creek"/><p><a href="#">Brandywine Creek State Park</a></p><p>41 Adams Dam Road<br>Wilmington, DE 19807<br>Brandywine Trail</p>', 39.797970, -75.573159, 2, 9],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen State Park</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Beach</p>', 38.792900, -75.088057, 3, 8],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Pinelands</p>', 38.783186, -75.098678, 1, 8],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen State Park</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Seaside Nature</p>', 38.784541, -75.098131, 1, 8],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen State Park</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Walking Dunes</p>', 38.765794, -75.084781, 2, 8],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen State Park</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Salt Marsh Spur</p>', 38.771574, -75.088818, 2, 8],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen State Park</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Bike Loop</p>', 38.782606, -75.101113, 2, 9],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen State Park</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Gordons Pond</p>', 38.742526, -75.082271, 2, 8],
+			['<img src="~wwwroot/images/map/CHSPmap.jpg" width="100" height="100" alt="Cape Henlopen"/><p><a href="#">Cape Henlopen State Park</a></p><p>15099 Cape Henlopen Dr<br>Lewes, DE 19958<br>Junction and Breakwater</p>', 38.719980, -75.111376, 1, 9],
+			['<img src="~wwwroot/images/map/DSSPmap.jpg" width="100" height="100" alt="Delaware Seashore"/><p><a href="#">Delaware Seashore State Park</a></p><p>7 Town Rd<br>Ocean View, DE 19970<br>Assawoman Canal Trail</p>', 38.544060, -75.082195, 2, 9],
+			['<img src="~wwwroot/images/map/DSSPmap.jpg" width="100" height="100" alt="Delaware Seashore"/><p><a href="#">Delaware Seashore State Park</a></p><p>Rd 50D<br>Rehoboth Beach, DE 19971<br>Beach Area</p>', 38.648931, -75.067286, 3, 8],
+			['<img src="~wwwroot/images/map/DSSPmap.jpg" width="100" height="100" alt="Delaware Seashore"/><p><a href="#">Delaware Seashore State Park</a></p><p>39401 Inlet Rd<br>Rehoboth Beach, DE 19971<br>Burton Island</p>', 38.616016, -75.072807, 1, 8],
+			['<img src="~wwwroot/images/map/DSSPmap.jpg" width="100" height="100" alt="Delaware Seashore"/><p><a href="#">Delaware Seashore State Park</a></p><p>Fred Hudson Rd<br>Bethany Beach, DE 19930<br>Fred Hudson Road Trail</p>', 38.555779, -75.070954, 3, 9],
+			['<img src="~wwwroot/images/map/DSSPmap.jpg" width="100" height="100" alt="Delaware Seashore"/><p><a href="#">Delaware Seashore State Park</a></p><p>Hickman Rd<br>Ocean View, DE 19970<br>Prickly Pear</p>', 38.563605, -75.072479, 3, 9],
+			['<img src="~wwwroot/images/map/DSSPmap.jpg" width="100" height="100" alt="Delaware Seashore"/><p><a href="#">Delaware Seashore State Park</a></p><p>Rehoboth Beach, DE 19971<br>Thompson Island</p>', 38.698183, -75.091117, 1, 9],
+			['<img src="~wwwroot/images/map/FISPmap.jpg" width="100" height="100" alt="Fenwick Island"/><p><a href="#">Fenwick Island State Park</a></p><p>24 Ocean Park Ln<br>Fenwick Island, DE 19944<br>Beach Area</p>', 38.475094, -75.049737, 3, 8],
+			['<img src="~wwwroot/images/map/FDSPmap.jpg" width="100" height="100" alt="Fort Delaware"/><p><a href="#">Fort Delaware State Park</a></p><p>New Castle County DE<br>Prison Camp</p>', 39.590176, -75.567341, 1, 8],
+			['<img src="~wwwroot/images/map/FDSPmap.jpg" width="100" height="100" alt="Fort DuPont"/><p><a href="#">Fort Delaware State Park</a></p><p>New Castle County DE<br>River View</p>', 39.572745, -75.581694, 1, 8],
+			['<img src="~wwwroot/images/map/PPSPmap.jpg" width="100" height="100" alt="Port Penn"/><p><a href="#">Port Penn State Park</a></p><p>5 Port Penn Rd<br>Middletown, DE 19709<br>Port Penn</p>', 39.517371, -75.579517, 1, 8],
+			['<img src="~wwwroot/images/map/FPSPmap.jpg" width="100" height="100" alt="Fox Point"/><p><a href="#">Fox Point State Park</a></p><p>Hay Road<br>Wilmington, DE 19809<br>Northern Delaware Greenway</p>', 39.757773, -75.488583, 2, 9],
+			['<img src="~wwwroot/images/map/FPSPmap.jpg" width="100" height="100" alt="Fox Point"/><p><a href="#">Fox Point State Park</a></p><p>Hay Road<br>Wilmington, DE 19809<br>Riverview</p>', 39.757773, -75.488583, 2, 9],
+			['<img src="~wwwroot/images/map/HLSPmap.jpg" width="100" height="100" alt="Holts Landing"/><p><a href="#">Holts Landing State Park</a></p><p>39415 Inlet Rd<br>Dagsboro, DE 19939<br>Sea Hawk</p>', 38.590402, -75.128235, 1, 8],
+			['<img src="~wwwroot/images/map/HLSPmap.jpg" width="100" height="100" alt="Holts Landing"/><p><a href="#">Holts Landing State Park</a></p><p>39415 Inlet Rd<br>Dagsboro, DE 19939<br>Seahorse</p>', 38.588011, -75.133618, 3, 9],
+			['<img src="~wwwroot/images/map/KPSPmap.jpg" width="100" height="100" alt="Killens Pond"/><p><a href="#">Killens Pond State Park</a></p><p>5025 Killens Pond Rd<br>Felton, DE 19943<br>Bike</p>', 38.987210, -75.539363, 2, 9],
+			['<img src="~wwwroot/images/map/KPSPmap.jpg" width="100" height="100" alt="Killens Pond"/><p><a href="#">Killens Pond State Park</a></p><p>5025 Killens Pond Rd<br>Felton, DE 19943<br>Pondside</p>', 38.983889, -75.537532, 1, 9],
+			['<img src="~wwwroot/images/map/KPSPmap.jpg" width="100" height="100" alt="Killens Pond"/><p><a href="#">Killens Pond State Park</a></p><p>5025 Killens Pond Rd<br>Felton, DE 19943<br>Cross Country</p>', 38.985168, -75.544992, 1, 8],
+			['<img src="~wwwroot/images/map/KPSPmap.jpg" width="100" height="100" alt="Killens Pond"/><p><a href="#">Killens Pond State Park</a></p><p>5025 Killens Pond Rd<br>Felton, DE 19943<br>Life Course</p>', 38.986027, -75.546752, 1, 9],
+			['<img src="~wwwroot/images/map/LPSPmap.jpg" width="100" height="100" alt="Lums Pond"/><p><a href="#">Lums Pond State Park</a></p><p>3355 Red Lion Rd<br>Bear, DE 19701<br>Little Jersey</p>', 39.565662, -75.729904, 3, 8],
+			['<img src="~wwwroot/images/map/LPSPmap.jpg" width="100" height="100" alt="Lums Pond"/><p><a href="#">Lums Pond State Park</a></p><p>3355 Red Lion Rd<br>Bear, DE 19701<br>Swamp Forest</p>', 39.565662, -75.729904, 1, 9],
+			['<img src="~wwwroot/images/map/LPSPmap.jpg" width="100" height="100" alt="Lums Pond"/><p><a href="#">Lums Pond State Park</a></p><p>3355 Red Lion Rd<br>Bear, DE 19701<br>Sensory Loop</p>', 39.563213, -75.729028, 1, 9],
+			['<img src="~wwwroot/images/map/LPSPmap.jpg" width="100" height="100" alt="Lums Pond"/><p><a href="#">Lums Pond State Park</a></p><p>3355 Red Lion Rd<br>Bear, DE 19701<br>Life Course</p>', 39.561550, -75.724533, 1, 8],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>American Holly</p>', 38.522926, -75.480642, 2, 9],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>Bob</p>', 38.523178, -75.475052, 3, 9],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>Cypress Point</p>', 38.524603, -75.470286, 1, 9],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>Huckleberry</p>', 38.523105, -75.478508, 3, 8],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>Island</p>', 38.524662, -75.477066, 1, 9],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>Terrapin Branch Water</p>', 38.520380, -75.462138, 4, 8],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>Racoon Pond Water</p>', 38.519473, -75.463619, 4, 8],
+			['<img src="~wwwroot/images/map/TPSPmap.jpg" width="100" height="100" alt="Trap Pond"/><p><a href="#">Trap Pond State Park</a></p><p>33587 Baldcypress Lane<br>Laurel, DE 19956<br>James Branch Water</p>', 38.520774, -75.470110, 4, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Millstone</p>', 39.714186, -75.767161, 1, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Twin Valley</p>', 39.714293, -75.766936, 1, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>David English</p>', 39.733327, -75.756913, 2, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Whitely Farms</p>', 39.725288, -75.743451, 2, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Bryans Field</p>', 39.725243, -75.736140, 2, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Boundary Line</p>', 39.739627, -75.757258, 2, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Chestnut Hill</p>', 39.705949, -75.708955, 2, 8],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Pomeroy</p>', 39.704428, -75.756253, 2, 9, ],
+			['<img src="~wwwroot/images/map/WCCSPmap.jpg" width="100" height="100" alt="White Clay Creek"/><p><a href="#">White Clay Creek State Park</a></p><p>880 New London Rd<br>Newark, DE 19711<br>Tri-Valley</p>', 39.714748, -75.758267, 2, 8],
+			['<img src="~wwwroot/images/map/WSPBPmap.jpg" width="100" height="100" alt="Brandywine Park"/><p><a href="#">Wilmington State Parks - Brandywine Park</a></p><p>1080 N Park Dr<br>Wilmington, DE 19802<br>Northern Delaware Greenway</p>', 39.756546, -75.551069, 2, 9]
+		];
+		var map = new google.maps.Map(document.getElementById('map'), {
+			zoom: 9,
+			center: new google.maps.LatLng(39.158368, -75.520299),
+			mapTypeId: google.maps.MapTypeId.ROADMAP
+		});
+		var markers = [];
+		var infowindow = new google.maps.InfoWindow();
+		var i, newMarker;
+		for (i = 0; i < locations.length; i++) {
+			newMarker = new google.maps.Marker({
+				position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+				map: map,
+			});
+			google.maps.event.addListener(newMarker, 'click', (function (newMarker, i) {
+				return function () {
+					infowindow.setContent(locations[i][0]);
+					infowindow.open(map, newMarker);
+				}
+			})(newMarker, i));
+			newMarker.category = locations[i][3];
+			newMarker.accessibility = locations[i][4];
+			newMarker.setVisible(false);
+			markers.push(newMarker);
+		}
+		function displayMarkers(obj, category) {
+			var i;
+			for (i = 0; i < markers.length; i++) {
+				if (markers[i].category === category) {
+					if ($(obj).is(":checked")) {
+						markers[i].setVisible(true);
+					} else {
+						markers[i].setVisible(false);
+					}
+				}
+			}
+		}
+		function showMarkers(obj, accessibility) {
+			var i;
+			for (i = 0; i < markers.length; i++) {
+				if (markers[i].accessibility === accessibility) {
+					if ($(obj).is(":checked")) {
+						markers[i].setVisible(true);
+					} else {
+						markers[i].setVisible(false);
+					}
+				}
+			}
+		}
+		var styledMapType = new google.maps.StyledMapType(
+	[
+	  { elementType: 'geometry', stylers: [{ color: '#ebe3cd' }] },
+	  { elementType: 'labels.text.fill', stylers: [{ color: '#523735' }] },
+	  { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f1e6' }] },
+	  {
+		  featureType: 'administrative',
+		  elementType: 'geometry.stroke',
+		  stylers: [{ color: '#c9b2a6' }]
+	  },
+	  {
+		  featureType: 'administrative.land_parcel',
+		  elementType: 'geometry.stroke',
+		  stylers: [{ color: '#D6C499' }]
+	  },
+	  {
+		  featureType: 'administrative.land_parcel',
+		  elementType: 'labels.text.fill',
+		  stylers: [{ color: '#ffffff' }]
+	  },
+	  {
+		  featureType: 'administrative.city',
+		  elementType: 'geometry.fill',
+		  stylers: [{ color: '#D6C499' }]
+	  },
+	  {
+		  featureType: 'landscape.natural',
+		  elementType: 'geometry',
+		  stylers: [{ color: '#ffffff' }]
+	  },
+	  {
+		  featureType: 'poi.park',
+		  elementType: 'geometry.fill',
+		  stylers: [{ color: '#5AB947' }]
+	  },
+	  {
+		  featureType: 'poi.park',
+		  elementType: 'labels.text.fill',
+		  stylers: [{ color: '#f98611' }]
+	  },
+	  {
+		  featureType: 'road',
+		  elementType: 'geometry',
+		  stylers: [{ color: '#8B5E3A' }]
+	  },
+	  {
+		  featureType: 'road.arterial',
+		  elementType: 'geometry',
+		  stylers: [{ color: '#8B5E3A' }]
+	  },
+	  {
+		  featureType: 'road.highway.controlled_access',
+		  elementType: 'geometry',
+		  stylers: [{ color: '#8B5E3A' }]
+	  },
+	  {
+		  featureType: 'road.highway.controlled_access',
+		  elementType: 'geometry.stroke',
+		  stylers: [{ color: '#8B5E3A' }]
+	  },
+	  {
+		  featureType: 'road.local',
+		  elementType: 'labels.text.fill',
+		  stylers: [{ color: '#1142a3' }]
+	  },
+	  {
+		  featureType: 'water',
+		  elementType: 'geometry.fill',
+		  stylers: [{ color: '#00599C' }, { "saturation": 50 }]
+	  },
+	  {
+		  featureType: 'water',
+		  elementType: 'labels.text.fill',
+		  stylers: [{ color: '#92998d' }]
+	  }
+	],
+	{ name: 'Styled Map' });
+		map.mapTypes.set('styled_map', styledMapType);
+		map.setMapTypeId('styled_map');
+	</script>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.2.4.js"
+	integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI="
+	crossorigin="anonymous"></script>
+
+</body>
+</html>
